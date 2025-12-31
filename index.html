@@ -14,76 +14,60 @@
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #000;
-    color: #fff;
+html, body {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    height: 100vh;
-    width: 100vw;
-    position: relative;
+    background: #000;
+    font-family: 'Arial', sans-serif;
 }
 
 /* 3D场景容器 */
-#scene3d {
+#scene-container {
     position: absolute;
     width: 100%;
     height: 100%;
-    perspective: 1200px;
+    perspective: 1500px;
     transform-style: preserve-3d;
-    overflow: hidden;
-}
-
-/* 图片容器 */
-.pic-container {
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    transform-style: preserve-3d;
-    transition: transform 0.8s ease-out;
-    cursor: pointer;
-    border-radius: 8px;
-    overflow: visible;
+    transition: transform 0.1s linear;
     will-change: transform;
 }
 
-/* 图片样式 */
-.pic-container .pic-frame {
-    width: 100%;
-    height: 100%;
+/* 图片项 */
+.picture-item {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    transform-style: preserve-3d;
+    transition: transform 1s cubic-bezier(0.25, 0.1, 0.25, 1);
+    cursor: pointer;
     border-radius: 8px;
     overflow: hidden;
-    position: relative;
-    box-shadow: 
-        0 0 0 1px rgba(0, 255, 255, 0.3),
-        0 0 20px rgba(0, 255, 255, 0.2),
-        0 0 40px rgba(0, 255, 255, 0.1);
-    background: rgba(20, 20, 40, 0.9);
-    transition: all 0.3s;
+    box-shadow: 0 0 15px rgba(0, 200, 255, 0.4);
+    background: rgba(10, 20, 30, 0.8);
+    border: 2px solid rgba(0, 200, 255, 0.5);
 }
 
-.pic-container:hover .pic-frame {
-    box-shadow: 
-        0 0 0 2px rgba(255, 50, 255, 0.6),
-        0 0 30px rgba(255, 50, 255, 0.4),
-        0 0 60px rgba(255, 50, 255, 0.2);
-    transform: scale(1.05);
-}
-
-.pic-container img {
+.picture-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.5s;
+    transition: transform 0.3s;
 }
 
-.pic-container:hover img {
+.picture-item:hover img {
     transform: scale(1.1);
 }
 
+.picture-item:hover {
+    box-shadow: 0 0 25px rgba(255, 100, 255, 0.7);
+    border-color: rgba(255, 100, 255, 0.8);
+    z-index: 1000;
+}
+
 /* 控制面板 */
-.control-panel {
+.controls {
     position: fixed;
     bottom: 20px;
     left: 0;
@@ -94,77 +78,59 @@ body {
     background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
 }
 
-.control-btn {
+.btn {
     background: rgba(0, 0, 0, 0.7);
-    border: 2px solid #0ff;
-    color: #0ff;
+    border: 2px solid #0af;
+    color: #0af;
     padding: 10px 20px;
     margin: 0 8px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: bold;
     transition: all 0.3s;
     min-width: 100px;
     outline: none;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
-.control-btn:hover {
-    background: rgba(0, 255, 255, 0.2);
+.btn:hover {
+    background: rgba(0, 170, 255, 0.3);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 170, 255, 0.4);
 }
 
-.control-btn.active {
-    background: rgba(0, 255, 255, 0.3);
+.btn.active {
+    background: rgba(0, 170, 255, 0.5);
     color: #fff;
     border-color: #fff;
 }
 
-/* 信息面板 */
-.info-panel {
+/* 信息显示 */
+.info {
     position: fixed;
     top: 20px;
     right: 20px;
     background: rgba(0, 0, 0, 0.8);
-    padding: 12px 18px;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 255, 255, 0.4);
-    font-size: 13px;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 200, 255, 0.4);
+    font-size: 12px;
     z-index: 1000;
-    backdrop-filter: blur(5px);
-    min-width: 180px;
+    min-width: 150px;
 }
 
-.info-item {
-    margin: 5px 0;
-    color: #0ff;
-    font-weight: 500;
+.info div {
+    margin: 4px 0;
+    color: #0af;
 }
 
-.info-item span {
+.info span {
     color: #fff;
-    font-weight: normal;
     margin-left: 5px;
 }
 
-/* 标题 */
-.gallery-title {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 24px;
-    color: #0ff;
-    z-index: 1000;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-/* 加载动画 */
-.loading-screen {
+/* 加载提示 */
+.loading {
     position: fixed;
     top: 0;
     left: 0;
@@ -176,220 +142,116 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 2000;
-    transition: opacity 0.5s;
+    color: #0af;
+    font-size: 20px;
 }
 
-.loading-text {
-    color: #0ff;
-    font-size: 24px;
-    margin-bottom: 20px;
-    text-align: center;
-    animation: pulse 1.5s infinite;
-}
-
-.loading-bar {
+.loading .progress {
     width: 300px;
     height: 4px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
-    overflow: hidden;
     margin-top: 20px;
+    overflow: hidden;
 }
 
-.loading-progress {
+.loading .progress-bar {
     height: 100%;
-    background: #0ff;
+    background: #0af;
     width: 0%;
     transition: width 0.3s;
-    box-shadow: 0 0 10px #0ff;
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-}
-
-/* 提示信息 */
-.hint-box {
+/* 提示消息 */
+.message {
     position: fixed;
     bottom: 100px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 100, 200, 0.9);
     color: white;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 6px;
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.3s;
-    font-size: 14px;
-    text-align: center;
-    min-width: 300px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-/* 粒子背景 */
-.particles-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
     pointer-events: none;
-    z-index: 1;
 }
 
-.particle {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: #0ff;
-    border-radius: 50%;
-    animation: float linear infinite;
-}
-
-@keyframes float {
-    0% { 
-        transform: translateY(100vh) translateX(0px) rotate(0deg);
-        opacity: 0;
-    }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { 
-        transform: translateY(-100px) translateX(100px) rotate(360deg);
-        opacity: 0;
-    }
-}
-
-/* 全屏图片查看器 */
-.fullscreen-viewer {
+/* 操作指南 */
+.instructions {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3000;
-    opacity: 0;
-    transition: opacity 0.3s;
-    backdrop-filter: blur(10px);
-}
-
-.fullscreen-img {
-    max-width: 90%;
-    max-height: 90%;
-    object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
-    transform: scale(0.9);
-    transition: transform 0.3s;
-}
-
-.close-btn {
-    position: absolute;
     top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid #0ff;
-    border-radius: 50%;
-    color: #0ff;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 12px;
+    z-index: 1000;
+    max-width: 300px;
 }
 
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: rotate(90deg);
+.instructions h3 {
+    color: #0af;
+    margin-bottom: 10px;
 }
 
-/* 移动端优化 */
-@media (max-width: 768px) {
-    .pic-container {
-        width: 120px;
-        height: 120px;
-    }
-    
-    .control-btn {
-        padding: 8px 12px;
-        font-size: 12px;
-        min-width: 70px;
-        margin: 2px;
-    }
-    
-    .info-panel {
-        padding: 8px 12px;
-        font-size: 11px;
-        min-width: 150px;
-    }
-    
-    .gallery-title {
-        font-size: 18px;
-    }
-    
-    .control-panel {
-        padding: 10px 0;
-    }
+.instructions p {
+    margin: 5px 0;
+    color: #ccc;
 }
 </style>
 </head>
 
 <body>
-<!-- 加载屏幕 -->
-<div class="loading-screen" id="loadingScreen">
-    <div class="loading-text">正在加载3D画廊...</div>
-    <div class="loading-bar">
-        <div class="loading-progress" id="loadingProgress"></div>
+<!-- 加载提示 -->
+<div class="loading" id="loading">
+    <div>加载3D画廊中...</div>
+    <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
     </div>
 </div>
 
-<!-- 标题 -->
-<div class="gallery-title">3D图片画廊</div>
-
-<!-- 信息面板 -->
-<div class="info-panel">
-    <div class="info-item">图片数量: <span id="picCount">0</span></div>
-    <div class="info-item">当前布局: <span id="layoutType">表格</span></div>
-    <div class="info-item">FPS: <span id="fpsCounter">60</span></div>
-    <div class="info-item">状态: <span id="statusText">就绪</span></div>
+<!-- 操作指南 -->
+<div class="instructions">
+    <h3>操作说明</h3>
+    <p>鼠标拖拽: 旋转视角</p>
+    <p>鼠标滚轮: 缩放视图</p>
+    <p>点击图片: 放大查看</p>
+    <p>下方按钮: 切换布局</p>
+    <h3>键盘快捷键</h3>
+    <p>1-4: 切换布局</p>
+    <p>R: 重置视图</p>
+    <p>方向键: 旋转视角</p>
 </div>
 
-<!-- 3D场景 -->
-<div id="scene3d"></div>
-
-<!-- 粒子背景 -->
-<div class="particles-bg" id="particlesBg"></div>
-
-<!-- 提示信息 -->
-<div class="hint-box" id="hintBox"></div>
-
-<!-- 全屏查看器 -->
-<div class="fullscreen-viewer" id="fullscreenViewer">
-    <img class="fullscreen-img" id="fullscreenImg" src="" alt="">
-    <div class="close-btn" onclick="closeFullscreen()">×</div>
+<!-- 信息显示 -->
+<div class="info">
+    <div>图片数量: <span id="picCount">0</span></div>
+    <div>当前布局: <span id="currentLayout">表格</span></div>
+    <div>FPS: <span id="fps">60</span></div>
 </div>
+
+<!-- 3D场景容器 -->
+<div id="scene-container"></div>
+
+<!-- 提示消息 -->
+<div class="message" id="message"></div>
 
 <!-- 控制面板 -->
-<div class="control-panel">
-    <button class="control-btn active" onclick="setLayout('table')">表格布局</button>
-    <button class="control-btn" onclick="setLayout('sphere')">球形布局</button>
-    <button class="control-btn" onclick="setLayout('helix')">螺旋布局</button>
-    <button class="control-btn" onclick="setLayout('grid')">网格布局</button>
-    <button class="control-btn" onclick="setLayout('random')">随机布局</button>
-    <button class="control-btn" onclick="resetView()">重置视图</button>
+<div class="controls">
+    <button class="btn active" onclick="setLayout('table')">表格</button>
+    <button class="btn" onclick="setLayout('sphere')">球形</button>
+    <button class="btn" onclick="setLayout('helix')">螺旋</button>
+    <button class="btn" onclick="setLayout('grid')">网格</button>
+    <button class="btn" onclick="setLayout('random')">随机</button>
+    <button class="btn" onclick="resetView()">重置</button>
 </div>
 
 <script>
-// ========== 全局变量 ==========
-let scene = document.getElementById('scene3d');
+// ====== 全局变量 ======
+let scene = document.getElementById('scene-container');
 let pictures = [];
 let currentLayout = 'table';
 let isDragging = false;
@@ -399,13 +261,14 @@ let targetRotationX = 0, targetRotationY = 0;
 let zoom = 1;
 let targetZoom = 1;
 let autoRotate = true;
-let autoRotateSpeed = 0.001;
-let lastTime = 0;
+let autoRotateSpeed = 0.002;
+let lastTime = performance.now();
 let frameCount = 0;
-let fps = 0;
+let fps = 60;
+let animationId = null;
 let isInitialized = false;
 
-// 图片列表 - 修改为您的图片文件名
+// 图片文件列表 - 请根据实际情况修改
 const imageFiles = [
     'd1.jpg',
     'd1.jpg',
@@ -416,174 +279,113 @@ const imageFiles = [
 ];
 
 // 布局配置
-const layoutPresets = {
-    table: { 
-        name: '表格布局',
-        rows: 6,
-        cols: 6,
-        spacing: 280
-    },
-    sphere: {
-        name: '球形布局',
-        radius: 1000,
-        count: 36
-    },
-    helix: {
-        name: '螺旋布局',
-        radius: 800,
-        height: 2000,
-        turns: 3
-    },
-    grid: {
-        name: '网格布局',
-        x: 5,
-        y: 5,
-        z: 2,
-        spacing: 300
-    }
+const layoutConfigs = {
+    table: { rows: 6, cols: 6, spacing: 220 },
+    sphere: { radius: 900, items: 36 },
+    helix: { radius: 700, height: 1800, turns: 4 },
+    grid: { x: 4, y: 3, z: 3, spacing: 240 }
 };
 
-// ========== 初始化函数 ==========
-async function initializeGallery() {
+// ====== 初始化函数 ======
+function init() {
     console.log('开始初始化3D画廊...');
-    updateStatus('正在初始化...');
     
-    try {
-        // 创建粒子背景
-        createParticles(40);
-        
-        // 创建图片容器
-        createPictureContainers(36);
-        
-        // 设置初始布局
-        await applyLayout('table');
-        
-        // 设置事件监听
-        setupEventListeners();
-        
-        // 隐藏加载屏幕
+    // 创建图片元素
+    createPictures(36);
+    
+    // 设置初始布局
+    setLayout('table');
+    
+    // 设置事件监听
+    setupEventListeners();
+    
+    // 隐藏加载提示
+    setTimeout(() => {
+        document.getElementById('loading').style.opacity = '0';
         setTimeout(() => {
-            document.getElementById('loadingScreen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('loadingScreen').style.display = 'none';
-                showHint('3D画廊加载完成！', 2000);
-                updateStatus('就绪');
-            }, 500);
-        }, 1000);
-        
-        // 开始动画循环
-        requestAnimationFrame(animationLoop);
-        
-        isInitialized = true;
-        console.log('3D画廊初始化完成！');
-        
-    } catch (error) {
-        console.error('初始化失败:', error);
-        updateStatus('初始化失败');
-        showHint('初始化失败: ' + error.message, 5000);
-    }
+            document.getElementById('loading').style.display = 'none';
+            showMessage('3D画廊加载完成！', 2000);
+        }, 500);
+    }, 1000);
+    
+    // 开始动画循环
+    startAnimation();
+    
+    isInitialized = true;
+    console.log('3D画廊初始化完成');
 }
 
-// ========== 创建图片容器 ==========
-function createPictureContainers(count) {
+// 创建图片元素
+function createPictures(count) {
     for (let i = 0; i < count; i++) {
-        const container = document.createElement('div');
-        container.className = 'pic-container';
-        container.dataset.index = i;
-        
-        const frame = document.createElement('div');
-        frame.className = 'pic-frame';
+        const picture = document.createElement('div');
+        picture.className = 'picture-item';
+        picture.dataset.index = i;
         
         const img = document.createElement('img');
         const imgIndex = i % imageFiles.length;
-        
-        // 设置图片源
         img.src = imageFiles[imgIndex];
         img.alt = `图片 ${i + 1}`;
         img.loading = 'lazy';
         
-        // 图片加载成功
-        img.onload = function() {
-            // 更新加载进度
-            updateLoadingProgress(i + 1, count);
-        };
-        
-        // 图片加载失败
+        // 图片加载错误处理
         img.onerror = function() {
             console.warn(`图片加载失败: ${imageFiles[imgIndex]}`);
             
-            // 创建替代内容
+            // 创建替代显示
             const placeholder = document.createElement('div');
             placeholder.style.cssText = `
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: white;
-                font-size: 20px;
+                color: #0af;
+                font-size: 24px;
                 font-weight: bold;
             `;
             placeholder.textContent = i + 1;
-            frame.appendChild(placeholder);
+            picture.appendChild(placeholder);
+            
+            // 移除错误的img元素
+            picture.removeChild(img);
             
             // 更新加载进度
-            updateLoadingProgress(i + 1, count);
+            updateProgress(i + 1, count);
+        };
+        
+        // 图片加载成功
+        img.onload = function() {
+            updateProgress(i + 1, count);
         };
         
         // 点击查看大图
-        container.onclick = function(e) {
+        picture.onclick = function(e) {
             e.stopPropagation();
             const imgElement = this.querySelector('img');
-            if (imgElement && imgElement.src) {
+            if (imgElement) {
                 showFullscreen(imgElement.src);
             }
         };
         
-        frame.appendChild(img);
-        container.appendChild(frame);
-        scene.appendChild(container);
-        pictures.push(container);
+        picture.appendChild(img);
+        scene.appendChild(picture);
+        pictures.push(picture);
     }
     
     document.getElementById('picCount').textContent = count;
-    console.log(`创建了 ${count} 个图片容器`);
+    console.log(`创建了 ${count} 个图片元素`);
 }
 
-// ========== 创建粒子背景 ==========
-function createParticles(count) {
-    const container = document.getElementById('particlesBg');
-    
-    for (let i = 0; i < count; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        // 随机属性
-        const size = Math.random() * 3 + 1;
-        const x = Math.random() * 100;
-        const duration = Math.random() * 20 + 10;
-        const delay = Math.random() * 20;
-        const color = Math.random() > 0.7 ? '#f0f' : '#0ff';
-        
-        particle.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            left: ${x}%;
-            opacity: ${Math.random() * 0.6 + 0.2};
-            animation-duration: ${duration}s;
-            animation-delay: ${delay}s;
-            background: ${color};
-        `;
-        
-        container.appendChild(particle);
-    }
+// 更新加载进度
+function updateProgress(current, total) {
+    const progress = Math.round((current / total) * 100);
+    document.getElementById('progressBar').style.width = `${progress}%`;
 }
 
-// ========== 布局函数 ==========
+// 设置布局
 function setLayout(layout) {
-    if (!isInitialized) return;
-    
     if (layout === 'random') {
         const layouts = ['table', 'sphere', 'helix', 'grid'];
         layout = layouts[Math.floor(Math.random() * layouts.length)];
@@ -592,13 +394,13 @@ function setLayout(layout) {
     currentLayout = layout;
     
     // 更新按钮状态
-    document.querySelectorAll('.control-btn').forEach(btn => {
+    document.querySelectorAll('.btn').forEach(btn => {
         btn.classList.remove('active');
     });
     event.target.classList.add('active');
     
     // 更新信息显示
-    document.getElementById('layoutType').textContent = 
+    document.getElementById('currentLayout').textContent = 
         layout === 'table' ? '表格' :
         layout === 'sphere' ? '球形' :
         layout === 'helix' ? '螺旋' :
@@ -607,82 +409,72 @@ function setLayout(layout) {
     // 应用布局
     applyLayout(layout);
     
-    showHint(`已切换到${layoutPresets[layout]?.name || layout}`, 1500);
+    showMessage(`已切换到${document.getElementById('currentLayout').textContent}布局`, 1500);
 }
 
-async function applyLayout(layout) {
-    if (!pictures.length) return;
+// 应用布局
+function applyLayout(layout) {
+    const config = layoutConfigs[layout];
+    if (!config || !pictures.length) return;
     
-    const config = layoutPresets[layout];
-    if (!config) return;
-    
-    updateStatus(`正在应用${config.name}...`);
-    
-    return new Promise(resolve => {
-        setTimeout(() => {
-            pictures.forEach((pic, index) => {
-                let x, y, z;
+    pictures.forEach((pic, index) => {
+        let x, y, z;
+        
+        switch(layout) {
+            case 'table':
+                const rows = config.rows;
+                const cols = config.cols;
+                const spacing = config.spacing;
+                const startX = -(cols - 1) * spacing / 2;
+                const startY = -(rows - 1) * spacing / 2;
                 
-                switch(layout) {
-                    case 'table':
-                        const rows = config.rows;
-                        const cols = config.cols;
-                        const spacing = config.spacing;
-                        const startX = -(cols - 1) * spacing / 2;
-                        const startY = -(rows - 1) * spacing / 2;
-                        
-                        const row = Math.floor(index / cols);
-                        const col = index % cols;
-                        x = startX + col * spacing;
-                        y = startY + row * spacing;
-                        z = 0;
-                        break;
-                        
-                    case 'sphere':
-                        const phi = Math.acos(-1 + (2 * index) / pictures.length);
-                        const theta = Math.sqrt(pictures.length * Math.PI) * phi;
-                        x = config.radius * Math.sin(phi) * Math.cos(theta);
-                        y = config.radius * Math.cos(phi);
-                        z = config.radius * Math.sin(phi) * Math.sin(theta);
-                        break;
-                        
-                    case 'helix':
-                        const t = index / pictures.length;
-                        const angle = t * Math.PI * 2 * config.turns;
-                        x = config.radius * Math.cos(angle);
-                        y = (t - 0.5) * config.height;
-                        z = config.radius * Math.sin(angle);
-                        break;
-                        
-                    case 'grid':
-                        const xCount = config.x;
-                        const yCount = config.y;
-                        const zCount = config.z;
-                        
-                        const xi = index % xCount;
-                        const yi = Math.floor(index / xCount) % yCount;
-                        const zi = Math.floor(index / (xCount * yCount));
-                        
-                        x = (xi - (xCount - 1) / 2) * config.spacing;
-                        y = (yi - (yCount - 1) / 2) * config.spacing;
-                        z = (zi - (zCount - 1) / 2) * config.spacing;
-                        break;
-                        
-                    default:
-                        x = y = z = 0;
-                }
+                const row = Math.floor(index / cols);
+                const col = index % cols;
+                x = startX + col * spacing;
+                y = startY + row * spacing;
+                z = 0;
+                break;
                 
-                // 应用位置
-                pic.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
-            });
-            
-            updateStatus('就绪');
-            resolve();
-        }, 50);
+            case 'sphere':
+                const phi = Math.acos(-1 + (2 * index) / pictures.length);
+                const theta = Math.sqrt(pictures.length * Math.PI) * phi;
+                x = config.radius * Math.sin(phi) * Math.cos(theta);
+                y = config.radius * Math.cos(phi);
+                z = config.radius * Math.sin(phi) * Math.sin(theta);
+                break;
+                
+            case 'helix':
+                const t = index / pictures.length;
+                const angle = t * Math.PI * 2 * config.turns;
+                x = config.radius * Math.cos(angle);
+                y = (t - 0.5) * config.height;
+                z = config.radius * Math.sin(angle);
+                break;
+                
+            case 'grid':
+                const xCount = config.x;
+                const yCount = config.y;
+                const zCount = config.z;
+                
+                const xi = index % xCount;
+                const yi = Math.floor(index / xCount) % yCount;
+                const zi = Math.floor(index / (xCount * yCount));
+                
+                x = (xi - (xCount - 1) / 2) * config.spacing;
+                y = (yi - (yCount - 1) / 2) * config.spacing;
+                z = (zi - (zCount - 1) / 2) * config.spacing;
+                break;
+                
+            default:
+                x = y = z = 0;
+        }
+        
+        // 应用位置变换
+        pic.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
     });
 }
 
-// ========== 视图控制 ==========
+// 重置视图
 function resetView() {
     targetRotationX = 0;
     targetRotationY = 0;
@@ -690,45 +482,77 @@ function resetView() {
     rotationX = 0;
     rotationY = 0;
     zoom = 1;
-    autoRotate = true;
     
     setLayout('table');
-    showHint('视图已重置', 1500);
+    showMessage('视图已重置', 1500);
 }
 
-// ========== 全屏查看 ==========
+// 显示全屏图片
 function showFullscreen(src) {
-    const viewer = document.getElementById('fullscreenViewer');
-    const img = document.getElementById('fullscreenImg');
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        opacity: 0;
+        transition: opacity 0.3s;
+    `;
     
+    const img = document.createElement('img');
     img.src = src;
-    viewer.style.display = 'flex';
+    img.style.cssText = `
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 10px;
+        box-shadow: 0 0 50px rgba(0, 200, 255, 0.5);
+        transform: scale(0.9);
+        transition: transform 0.3s;
+    `;
     
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+    
+    // 淡入
     setTimeout(() => {
-        viewer.style.opacity = '1';
+        overlay.style.opacity = '1';
         img.style.transform = 'scale(1)';
     }, 10);
+    
+    // 点击关闭
+    overlay.onclick = function(e) {
+        if (e.target === overlay) {
+            overlay.style.opacity = '0';
+            img.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+            }, 300);
+        }
+    };
 }
 
-function closeFullscreen() {
-    const viewer = document.getElementById('fullscreenViewer');
-    const img = document.getElementById('fullscreenImg');
-    
-    viewer.style.opacity = '0';
-    img.style.transform = 'scale(0.9)';
+// 显示消息
+function showMessage(text, duration = 2000) {
+    const message = document.getElementById('message');
+    message.textContent = text;
+    message.style.opacity = '1';
     
     setTimeout(() => {
-        viewer.style.display = 'none';
-        img.src = '';
-    }, 300);
+        message.style.opacity = '0';
+    }, duration);
 }
 
-// ========== 事件监听 ==========
+// 设置事件监听
 function setupEventListeners() {
-    const container = document.getElementById('scene3d');
-    
     // 鼠标拖拽旋转
-    container.addEventListener('mousedown', (e) => {
+    scene.addEventListener('mousedown', (e) => {
         isDragging = true;
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
@@ -753,22 +577,22 @@ function setupEventListeners() {
         setTimeout(() => { autoRotate = true; }, 3000);
     });
     
-    // 滚轮缩放
-    container.addEventListener('wheel', (e) => {
+    // 鼠标滚轮缩放
+    scene.addEventListener('wheel', (e) => {
         e.preventDefault();
         targetZoom += e.deltaY * -0.001;
         targetZoom = Math.max(0.3, Math.min(3, targetZoom));
     });
     
-    // 触摸支持
-    container.addEventListener('touchstart', (e) => {
+    // 触摸事件
+    scene.addEventListener('touchstart', (e) => {
         isDragging = true;
         lastMouseX = e.touches[0].clientX;
         lastMouseY = e.touches[0].clientY;
         autoRotate = false;
     });
     
-    container.addEventListener('touchmove', (e) => {
+    scene.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
         
         const deltaX = e.touches[0].clientX - lastMouseX;
@@ -781,7 +605,7 @@ function setupEventListeners() {
         lastMouseY = e.touches[0].clientY;
     });
     
-    container.addEventListener('touchend', () => {
+    scene.addEventListener('touchend', () => {
         isDragging = false;
         setTimeout(() => { autoRotate = true; }, 3000);
     });
@@ -810,92 +634,93 @@ function setupEventListeners() {
                 setLayout('grid');
                 break;
             case 'Escape':
-                closeFullscreen();
+                // 关闭全屏图片
+                const overlay = document.querySelector('[style*="z-index: 3000"]');
+                if (overlay) overlay.click();
+                break;
+            case 'ArrowLeft':
+                targetRotationY += 0.1;
+                break;
+            case 'ArrowRight':
+                targetRotationY -= 0.1;
+                break;
+            case 'ArrowUp':
+                targetRotationX += 0.1;
+                break;
+            case 'ArrowDown':
+                targetRotationX -= 0.1;
                 break;
         }
     });
-    
-    // ESC键关闭全屏
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            const viewer = document.getElementById('fullscreenViewer');
-            if (viewer.style.display === 'flex') {
-                closeFullscreen();
-            }
+}
+
+// 开始动画循环
+function startAnimation() {
+    function animate(currentTime) {
+        animationId = requestAnimationFrame(animate);
+        
+        // 计算FPS
+        frameCount++;
+        if (currentTime - lastTime >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastTime = currentTime;
+            document.getElementById('fps').textContent = fps;
         }
-    });
-}
-
-// ========== 动画循环 ==========
-function animationLoop(currentTime) {
-    requestAnimationFrame(animationLoop);
-    
-    // 计算FPS
-    frameCount++;
-    if (currentTime - lastTime >= 1000) {
-        fps = Math.round(frameCount * 1000 / (currentTime - lastTime));
-        frameCount = 0;
-        lastTime = currentTime;
-        document.getElementById('fpsCounter').textContent = fps;
+        
+        // 平滑插值
+        rotationX += (targetRotationX - rotationX) * 0.1;
+        rotationY += (targetRotationY - rotationY) * 0.1;
+        zoom += (targetZoom - zoom) * 0.1;
+        
+        // 自动旋转
+        if (autoRotate && !isDragging) {
+            targetRotationY += autoRotateSpeed;
+        }
+        
+        // 应用变换
+        scene.style.transform = `
+            rotateX(${rotationX}rad)
+            rotateY(${rotationY}rad)
+            scale(${zoom})
+        `;
     }
     
-    // 平滑插值
-    rotationX += (targetRotationX - rotationX) * 0.1;
-    rotationY += (targetRotationY - rotationY) * 0.1;
-    zoom += (targetZoom - zoom) * 0.1;
-    
-    // 自动旋转
-    if (autoRotate && !isDragging) {
-        targetRotationY += autoRotateSpeed;
+    // 开始动画
+    animationId = requestAnimationFrame(animate);
+}
+
+// 停止动画循环
+function stopAnimation() {
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
     }
-    
-    // 应用变换
-    scene.style.transform = `
-        rotateX(${rotationX}rad)
-        rotateY(${rotationY}rad)
-        scale(${zoom})
-    `;
 }
 
-// ========== 工具函数 ==========
-function showHint(text, duration = 2000) {
-    const hintBox = document.getElementById('hintBox');
-    hintBox.textContent = text;
-    hintBox.style.opacity = '1';
-    
-    setTimeout(() => {
-        hintBox.style.opacity = '0';
-    }, duration);
-}
-
-function updateStatus(text) {
-    document.getElementById('statusText').textContent = text;
-}
-
-function updateLoadingProgress(current, total) {
-    const progress = (current / total) * 100;
-    document.getElementById('loadingProgress').style.width = `${progress}%`;
-}
-
-// ========== 错误处理 ==========
-window.addEventListener('error', function(e) {
-    console.error('页面错误:', e.message, 'at', e.filename, ':', e.lineno);
-    updateStatus('发生错误');
-    showHint('发生错误，请刷新页面', 5000);
-});
-
-window.addEventListener('unhandledrejection', function(e) {
-    console.error('未处理的Promise拒绝:', e.reason);
-});
-
-// ========== 页面加载 ==========
+// 页面加载完成后初始化
 window.addEventListener('DOMContentLoaded', function() {
-    console.log('页面加载完成，开始初始化3D画廊...');
+    console.log('页面加载完成，开始初始化...');
     
-    // 延迟初始化，确保DOM完全加载
-    setTimeout(() => {
-        initializeGallery();
-    }, 100);
+    // 开始初始化
+    setTimeout(init, 100);
+});
+
+// 页面可见性变化
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        console.log('页面隐藏，暂停动画');
+        stopAnimation();
+    } else {
+        console.log('页面显示，继续动画');
+        startAnimation();
+    }
+});
+
+// 错误处理
+window.addEventListener('error', function(e) {
+    console.error('页面错误:', e.message);
+    showMessage('发生错误，请查看控制台', 5000);
 });
 </script>
 </body>
