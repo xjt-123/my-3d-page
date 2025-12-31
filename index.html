@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>杜佳甲老婆</title>
+<title>我的3D页面</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- 解决 favicon.ico 404 -->
@@ -22,12 +22,19 @@ html,body{
   height:150px;
   box-shadow:0 0 12px rgba(0,255,255,.5);
   border:1px solid rgba(127,255,255,.25);
+  cursor:pointer;
+  transition:transform 0.3s;
+}
+.element:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 20px rgba(0,255,255,0.8);
 }
 .element canvas{
   width:150px;
   height:150px;
   display:block;
   border-radius:6px;
+  object-fit:cover;
 }
 #menu{
   position:fixed;
@@ -37,166 +44,281 @@ html,body{
   z-index:10;
 }
 button{
-  background:transparent;
+  background:rgba(0,0,0,0.6);
   border:1px solid rgba(127,255,255,.75);
   color:rgba(127,255,255,.75);
-  padding:6px 12px;
+  padding:8px 16px;
   margin:0 5px;
   cursor:pointer;
+  border-radius:4px;
+  font-size:14px;
+  transition:all 0.3s;
 }
 button:hover{
-  background:rgba(127,255,255,.15);
+  background:rgba(127,255,255,.3);
+  transform:translateY(-2px);
+}
+#loading{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  color:#0ff;
+  font-size:20px;
+  z-index:100;
 }
 </style>
 </head>
 
 <body>
+<div id="loading">加载中...</div>
 <div id="container"></div>
 
 <div id="menu">
-  <button onclick="transform(targets.table,2000)">表格</button>
-  <button onclick="transform(targets.sphere,2000)">球形</button>
-  <button onclick="transform(targets.helix,2000)">螺旋</button>
-  <button onclick="transform(targets.grid,2000)">网格</button>
+  <button onclick="transform('table',2000)">表格</button>
+  <button onclick="transform('sphere',2000)">球形</button>
+  <button onclick="transform('helix',2000)">螺旋</button>
+  <button onclick="transform('grid',2000)">网格</button>
+  <button onclick="randomLayout()">随机</button>
 </div>
 
-<!-- ✅ CDN（GitHub Pages 永不 404） -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/renderers/CSS3DRenderer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/controls/TrackballControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.6.4/dist/tween.umd.js"></script>
+<!-- 使用更稳定的CDN版本 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS3DRenderer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.min.js"></script>
 
 <script>
-const objects = [];
-const targets = { table:[], sphere:[], helix:[], grid:[] };
+// 全局变量
 let camera, scene, renderer, controls;
+let objects = [];
+let targets = { table: [], sphere: [], helix: [], grid: [] };
+let currentTarget = 'table';
+let imagesLoaded = 0;
+const totalImages = 2; // 根据您实际的图片数量调整
 
+// 图片名称数组 - 根据您仓库中的图片修改
+const imageFiles = ['d1.jpg', 'd2.jpg']; // 添加您所有的图片文件名
+
+// 初始化
 init();
-animate();
 
-/* 自动适配 GitHub Pages 路径 */
-function imgURL(name){
-  return new URL(name, window.location.href).href;
-}
-
-function init(){
-  camera = new THREE.PerspectiveCamera(40, window.innerWidth/window.innerHeight, 1, 10000);
+function init() {
+  // 隐藏加载提示
+  document.getElementById('loading').style.display = 'none';
+  
+  // 创建相机
+  camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.z = 3000;
-
+  
+  // 创建场景
   scene = new THREE.Scene();
-
-  /* 创建图片卡片 */
-  for(let i=0;i<120;i++){
-    const div = document.createElement('div');
-    div.className = 'element';
-
-    const canvas = document.createElement('canvas');
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = 150 * dpr;
-    canvas.height = 150 * dpr;
-    canvas.style.width = '150px';
-    canvas.style.height = '150px';
-
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
-    img.src = imgURL('d1.jpg');   // ✅ 仓库根目录图片
-
-    div.appendChild(canvas);
-
-    const obj = new THREE.CSS3DObject(div);
-    obj.position.set(
-      Math.random()*4000-2000,
-      Math.random()*4000-2000,
-      Math.random()*4000-2000
-    );
-    scene.add(obj);
-    objects.push(obj);
-
-    /* table */
-    const target = new THREE.Object3D();
-    target.position.set(
-      (i % 10) * 300 - 1500,
-      -Math.floor(i / 10) * 220 + 1000,
-      0
-    );
-    targets.table.push(target);
-  }
-
-  /* sphere */
-  const spherical = new THREE.Spherical();
-  objects.forEach((_, i) => {
-    const obj = new THREE.Object3D();
-    spherical.set(
-      800,
-      Math.acos(-1 + (2 * i) / objects.length),
-      Math.sqrt(objects.length * Math.PI) * i
-    );
-    obj.position.setFromSpherical(spherical);
-    targets.sphere.push(obj);
-  });
-
-  /* helix（兼容写法，解决 setFromCylindricalCoords 报错） */
-  objects.forEach((_, i) => {
-    const obj = new THREE.Object3D();
-    const radius = 900;
-    const theta = i * 0.175 + Math.PI;
-    const y = -i * 5 + 450;
-
-    obj.position.set(
-      radius * Math.cos(theta),
-      y,
-      radius * Math.sin(theta)
-    );
-    targets.helix.push(obj);
-  });
-
-  /* grid */
-  objects.forEach((_, i) => {
-    const obj = new THREE.Object3D();
-    obj.position.set(
-      (i % 5) * 400 - 800,
-      -(Math.floor(i / 5) % 5) * 300 + 500,
-      Math.floor(i / 25) * 400 - 800
-    );
-    targets.grid.push(obj);
-  });
-
+  
+  // 创建3D对象
+  createObjects();
+  
+  // 创建目标位置
+  createTargets();
+  
+  // 创建渲染器
   renderer = new THREE.CSS3DRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.getElementById('container').appendChild(renderer.domElement);
-
+  
+  // 创建控制器
   controls = new THREE.TrackballControls(camera, renderer.domElement);
+  controls.rotateSpeed = 1.0;
+  controls.zoomSpeed = 1.2;
+  controls.panSpeed = 0.8;
+  controls.noZoom = false;
+  controls.noPan = false;
+  controls.staticMoving = true;
+  controls.dynamicDampingFactor = 0.3;
   controls.minDistance = 500;
   controls.maxDistance = 6000;
-
-  transform(targets.table, 2000);
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+  
+  // 初始变换到表格布局
+  transform('table', 0);
+  
+  // 窗口大小调整事件
+  window.addEventListener('resize', onWindowResize);
+  
+  // 开始动画循环
+  animate();
 }
 
-function transform(targetArr, duration){
+function createObjects() {
+  // 清除现有对象
+  objects.forEach(obj => scene.remove(obj));
+  objects = [];
+  
+  // 创建图片卡片
+  for (let i = 0; i < 120; i++) {
+    const element = document.createElement('div');
+    element.className = 'element';
+    
+    // 创建画布
+    const canvas = document.createElement('canvas');
+    canvas.width = 300; // 2倍大小用于高清显示
+    canvas.height = 300;
+    canvas.style.width = '150px';
+    canvas.style.height = '150px';
+    
+    // 获取2D上下文
+    const ctx = canvas.getContext('2d');
+    
+    // 创建图片对象
+    const img = new Image();
+    img.crossOrigin = 'anonymous'; // 解决跨域问题
+    
+    // 使用循环的图片
+    const imgIndex = i % imageFiles.length;
+    img.src = imageFiles[imgIndex];
+    
+    // 图片加载完成后的处理
+    img.onload = function() {
+      // 清除画布
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 绘制图片（居中裁剪）
+      const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+      const x = (canvas.width - img.width * scale) / 2;
+      const y = (canvas.height - img.height * scale) / 2;
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      
+      // 添加边框效果
+      ctx.strokeStyle = 'rgba(127,255,255,0.5)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    };
+    
+    // 图片加载失败的处理
+    img.onerror = function() {
+      // 绘制占位符
+      ctx.fillStyle = '#0a192f';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0ff';
+      ctx.font = '20px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`图片 ${i+1}`, canvas.width/2, canvas.height/2);
+      
+      // 添加边框
+      ctx.strokeStyle = 'rgba(127,255,255,0.3)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    };
+    
+    element.appendChild(canvas);
+    
+    // 创建3D对象
+    const object = new THREE.CSS3DObject(element);
+    object.position.x = Math.random() * 4000 - 2000;
+    object.position.y = Math.random() * 4000 - 2000;
+    object.position.z = Math.random() * 4000 - 2000;
+    
+    scene.add(object);
+    objects.push(object);
+  }
+}
+
+function createTargets() {
+  // 清空目标数组
+  targets = { table: [], sphere: [], helix: [], grid: [] };
+  
+  // 表格布局
+  for (let i = 0; i < objects.length; i++) {
+    const target = new THREE.Object3D();
+    target.position.x = (i % 10) * 300 - 1500;
+    target.position.y = (-Math.floor(i / 10) * 220) + 1000;
+    target.position.z = 0;
+    targets.table.push(target);
+  }
+  
+  // 球形布局
+  for (let i = 0; i < objects.length; i++) {
+    const target = new THREE.Object3D();
+    const phi = Math.acos(-1 + (2 * i) / objects.length);
+    const theta = Math.sqrt(objects.length * Math.PI) * phi;
+    
+    target.position.x = 800 * Math.sin(phi) * Math.cos(theta);
+    target.position.y = 800 * Math.cos(phi);
+    target.position.z = 800 * Math.sin(phi) * Math.sin(theta);
+    targets.sphere.push(target);
+  }
+  
+  // 螺旋布局 - 修复版，避免使用不存在的API
+  for (let i = 0; i < objects.length; i++) {
+    const target = new THREE.Object3D();
+    const radius = 900;
+    const theta = i * 0.175 + Math.PI;
+    const y = -(i * 5) + 450;
+    
+    target.position.x = radius * Math.cos(theta);
+    target.position.y = y;
+    target.position.z = radius * Math.sin(theta);
+    targets.helix.push(target);
+  }
+  
+  // 网格布局
+  for (let i = 0; i < objects.length; i++) {
+    const target = new THREE.Object3D();
+    target.position.x = ((i % 5) * 400) - 800;
+    target.position.y = (-(Math.floor(i / 5) % 5) * 300) + 500;
+    target.position.z = (Math.floor(i / 25)) * 400 - 800;
+    targets.grid.push(target);
+  }
+}
+
+function transform(targetName, duration) {
+  // 安全检查
+  if (!targets[targetName] || targets[targetName].length === 0) {
+    console.error('目标数组不存在或为空:', targetName);
+    return;
+  }
+  
+  // 如果目标数组长度与对象数组不匹配，重新创建目标
+  if (targets[targetName].length !== objects.length) {
+    createTargets();
+  }
+  
   TWEEN.removeAll();
-  objects.forEach((obj, i) => {
-    const t = targetArr[i];
-    new TWEEN.Tween(obj.position)
+  currentTarget = targetName;
+  
+  for (let i = 0; i < objects.length; i++) {
+    const object = objects[i];
+    const target = targets[targetName][i];
+    
+    // 额外的安全检查
+    if (!object || !target) {
+      console.warn(`对象或目标未定义: object[${i}], target[${i}]`);
+      continue;
+    }
+    
+    new TWEEN.Tween(object.position)
       .to({
-        x: t.position.x,
-        y: t.position.y,
-        z: t.position.z
+        x: target.position.x,
+        y: target.position.y,
+        z: target.position.z
       }, duration)
       .easing(TWEEN.Easing.Exponential.InOut)
       .start();
-  });
+  }
 }
 
-function animate(){
+function randomLayout() {
+  const layouts = ['table', 'sphere', 'helix', 'grid'];
+  const randomLayout = layouts[Math.floor(Math.random() * layouts.length)];
+  transform(randomLayout, 2000);
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
   requestAnimationFrame(animate);
   TWEEN.update();
   controls.update();
