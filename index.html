@@ -1,136 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<title>杜佳甲老婆</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-html,body{height:100%;margin:0;overflow:hidden;background:#000;font-family:Helvetica}
-#container{width:100%;height:100%}
-.element{width:150px;height:150px;box-shadow:0 0 12px rgba(0,255,255,.5);border:1px solid rgba(127,255,255,.25)}
-.element canvas{width:150px;height:150px;display:block;border-radius:4px}
-#menu{position:fixed;bottom:20px;width:100%;text-align:center;z-index:10}
-button{background:transparent;border:1px solid rgba(127,255,255,.75);color:rgba(127,255,255,.75);padding:6px 12px;margin:0 5px;cursor:pointer}
-</style>
+  <meta charset="utf-8">
+  <title>杜佳甲老婆</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html,body{height:100%;margin:0;overflow:hidden;background:#000;font-family:Helvetica}
+    #container{width:100%;height:100%}
+    .element{width:150px;height:150px;box-shadow:0 0 12px rgba(0,255,255,.5);border:1px solid rgba(127,255,255,.25)}
+    .element canvas{width:150px;height:150px;display:block;border-radius:4px}
+    #menu{position:fixed;bottom:20px;width:100%;text-align:center;z-index:10}
+    button{background:transparent;border:1px solid rgba(127,255,255,.75);color:rgba(127,255,255,.75);padding:6px 12px;margin:0 5px;cursor:pointer}
+  </style>
 </head>
-
 <body>
-<div id="container"></div>
+  <div id="container"></div>
 
-<div id="menu">
-  <button onclick="transform(targets.table,2000)">表格</button>
-  <button onclick="transform(targets.sphere,2000)">球形</button>
-  <button onclick="transform(targets.helix,2000)">螺旋</button>
-  <button onclick="transform(targets.grid,2000)">网格</button>
-</div>
+  <div id="menu">
+    <button onclick="transform(targets.table,2000)">表格</button>
+    <button onclick="transform(targets.sphere,2000)">球形</button>
+    <button onclick="transform(targets.helix,2000)">螺旋</button>
+    <button onclick="transform(targets.grid,2000)">网格</button>
+  </div>
 
-<!-- ✅ CDN：不会 404 -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/renderers/CSS3DRenderer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/controls/TrackballControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.6.4/dist/tween.umd.js"></script>
+  <!-- 使用你仓库根目录里上传的本地文件（注意 ./ 前缀） -->
+  <script src="./three.min.js"></script>
+  <script src="./CSS3DRenderer.js"></script>
+  <script src="./TrackballControls.js"></script>
+  <script src="./tween.min.js"></script>
 
-<script>
-const objects = [];
-const targets = { table:[], sphere:[], helix:[], grid:[] };
+  <script>
+  const objects = [];
+  const targets = { table:[], sphere:[], helix:[], grid:[] };
+  let camera, scene, renderer, controls;
 
-let camera, scene, renderer, controls;
+  init();
+  animate();
 
-init();
-animate();
+  // 帮助：基于当前页面 URL 生成资源绝对地址
+  function absPath(name){ return new URL(name, location.href).href; }
 
-function imgURL(name){
-  return new URL(name, location.href).href; // 关键：自动适配 GitHub Pages 路径
-}
+  function init(){
+    camera = new THREE.PerspectiveCamera(40, window.innerWidth/window.innerHeight, 1, 10000);
+    camera.position.z = 3000;
+    scene = new THREE.Scene();
 
-function init(){
-  camera = new THREE.PerspectiveCamera(40, window.innerWidth/window.innerHeight, 1, 10000);
-  camera.position.z = 3000;
+    // 加载并绘制若干项（图片位于仓库根：d.jpg）
+    for (let i=0;i<120;i++){
+      const div = document.createElement('div');
+      div.className = 'element';
 
-  scene = new THREE.Scene();
+      const canvas = document.createElement('canvas');
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(150 * dpr);
+      canvas.height = Math.round(150 * dpr);
+      canvas.style.width = '150px';
+      canvas.style.height = '150px';
+      const ctx = canvas.getContext('2d');
 
-  for(let i=0;i<120;i++){
-    const div = document.createElement('div');
-    div.className = 'element';
+      const img = new Image();
+      img.onload = () => {
+        // draw covering whole canvas
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = absPath('d.jpg'); // ← 确认你的仓库根有 d.jpg
 
-    const canvas = document.createElement('canvas');
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = 150*dpr;
-    canvas.height = 150*dpr;
-    canvas.style.width = '150px';
-    canvas.style.height = '150px';
+      div.appendChild(canvas);
+      const cssObj = new THREE.CSS3DObject(div);
+      cssObj.position.set(Math.random()*4000-2000, Math.random()*4000-2000, Math.random()*4000-2000);
+      scene.add(cssObj);
+      objects.push(cssObj);
 
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    img.onload = ()=>{
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    };
-    img.src = imgURL('d.jpg'); // ✅ 你仓库根目录的图片
+      const target = new THREE.Object3D();
+      target.position.x = (i%10)*300 - 1500;
+      target.position.y = - Math.floor(i/10) * 220 + 1000;
+      targets.table.push(target);
+    }
 
-    div.appendChild(canvas);
+    // sphere
+    const spherical = new THREE.Spherical();
+    for (let i=0,l=objects.length;i<l;i++){
+      const obj = new THREE.Object3D();
+      const phi = Math.acos(-1 + (2*i)/l);
+      const theta = Math.sqrt(l*Math.PI) * phi;
+      spherical.set(800, phi, theta);
+      obj.position.setFromSpherical(spherical);
+      targets.sphere.push(obj);
+    }
 
-    const obj = new THREE.CSS3DObject(div);
-    obj.position.set(Math.random()*4000-2000,Math.random()*4000-2000,Math.random()*4000-2000);
-    scene.add(obj);
-    objects.push(obj);
+    // helix
+    for (let i=0;i<objects.length;i++){
+      const obj = new THREE.Object3D();
+      // use cylindrical coordinates via setFromCylindricalCoords if available
+      obj.position.setFromCylindricalCoords(900, i*0.175 + Math.PI, -i*5 + 450);
+      targets.helix.push(obj);
+    }
 
-    const target = new THREE.Object3D();
-    target.position.x = (i%10)*300-1500;
-    target.position.y = -(Math.floor(i/10))*220+1000;
-    targets.table.push(target);
+    // grid
+    for (let i=0;i<objects.length;i++){
+      const obj = new THREE.Object3D();
+      obj.position.x = (i%5)*400 - 800;
+      obj.position.y = - (Math.floor(i/5)%5) * 300 + 500;
+      obj.position.z = Math.floor(i/25)*400 - 800;
+      targets.grid.push(obj);
+    }
+
+    renderer = new THREE.CSS3DRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('container').appendChild(renderer.domElement);
+
+    controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+    window.addEventListener('resize', ()=> {
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    transform(targets.table, 2000);
   }
 
-  // sphere
-  const spherical = new THREE.Spherical();
-  objects.forEach((_,i)=>{
-    const obj = new THREE.Object3D();
-    spherical.set(800, Math.acos(-1+2*i/objects.length), Math.sqrt(objects.length*Math.PI)*i);
-    obj.position.setFromSpherical(spherical);
-    targets.sphere.push(obj);
-  });
+  function transform(targetsArr, duration){
+    TWEEN.removeAll();
+    for (let i=0;i<objects.length;i++){
+      const obj = objects[i];
+      const t = targetsArr[i] || targetsArr[i % targetsArr.length];
+      new TWEEN.Tween(obj.position).to({ x: t.position.x, y: t.position.y, z: t.position.z }, Math.random()*duration + duration).easing(TWEEN.Easing.Exponential.InOut).start();
+      new TWEEN.Tween(obj.rotation).to({ x: t.rotation.x, y: t.rotation.y, z: t.rotation.z }, Math.random()*duration + duration).easing(TWEEN.Easing.Exponential.InOut).start();
+    }
+    new TWEEN.Tween(this).to({}, duration*2).onUpdate(render).start();
+  }
 
-  // helix
-  objects.forEach((_,i)=>{
-    const obj = new THREE.Object3D();
-    obj.position.setFromCylindricalCoords(900,i*0.3,-i*8);
-    targets.helix.push(obj);
-  });
+  function animate(){
+    requestAnimationFrame(animate);
+    TWEEN.update();
+    if (controls) controls.update();
+    if (renderer && scene && camera) renderer.render(scene, camera);
+  }
 
-  // grid
-  objects.forEach((_,i)=>{
-    const obj = new THREE.Object3D();
-    obj.position.set((i%5)*400-800,-(Math.floor(i/5)%5)*300+500,Math.floor(i/25)*400-800);
-    targets.grid.push(obj);
-  });
-
-  renderer = new THREE.CSS3DRenderer();
-  renderer.setSize(window.innerWidth,window.innerHeight);
-  document.getElementById('container').appendChild(renderer.domElement);
-
-  controls = new THREE.TrackballControls(camera, renderer.domElement);
-  transform(targets.table,2000);
-
-  window.addEventListener('resize',()=>{
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth,window.innerHeight);
-  });
-}
-
-function transform(targetsArr,duration){
-  TWEEN.removeAll();
-  objects.forEach((obj,i)=>{
-    const t = targetsArr[i];
-    new TWEEN.Tween(obj.position).to(t.position,duration).easing(TWEEN.Easing.Exponential.InOut).start();
-  });
-}
-
-function animate(){
-  requestAnimationFrame(animate);
-  TWEEN.update();
-  controls.update();
-  renderer.render(scene,camera);
-}
-</script>
+  function render(){ if (renderer && scene && camera) renderer.render(scene, camera); }
+  </script>
 </body>
 </html>
